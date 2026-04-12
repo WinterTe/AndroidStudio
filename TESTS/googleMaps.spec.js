@@ -23,10 +23,10 @@ async function main() {
     console.log("Step 1 : Waiting for the search box to be visible in English");
     
     const searchEn = await driver.$('android=new UiSelector().text("Search here")');
-    const searchCz = await driver.$('android=new UiSelector().text("Vyhledání místa")');
+    const searchCz = await driver.$('//input[contains(@placeholder, "Vyhledání")]');
     
     await searchEn.waitForExist({ timeout: 15000});
-    console.log("Info: Search box in English is visible, the test continues...");
+    console.log("Info: Search box in English is visible, the test continues...")
 
     // Waiting for "Use Maps on Chrome" and clicking on it if it appears
     console.log("Step 2 : Waiting for Use Maps on Chrome and clicking on it if it appears");
@@ -37,18 +37,23 @@ async function main() {
     await useMapsOnChrome.click();
     console.log("Info: 'Use Maps on Chrome' option has been clicked, the test continues...");
 
-    // Waiting for the search box loading in Czech
-    console.log("Step 3 : Waiting for the search box loading in Czech");
-    
-    await searchCz.waitForExist({ timeout: 55000 });
-    console.log("Info: Search box in Czech is visible, the test continues...");
+    // Waiting for the search box to be fully displayed in Czech
+    console.log("Step 3 : Waiting for the search box to be fully displayed in Czech and setting text into it");
 
-    // Setting text "Packeta Group" into the field and pressing Enter key
-    console.log("Step 4 : Setting text 'Packeta Group' into the field and pressing Enter key");
-    
+    await searchCz.waitForDisplayed({ timeout: 55000 });
+    await searchCz.waitForEnabled({ timeout: 55000 });
     await searchCz.click();
-    await searchCz.setValue('Packeta Group');
-    await driver.pressKeyCode(66);
+
+    await driver.waitUntil(async () => await searchCz.isFocused(), {
+        timeout: 10000,
+        timeoutMsg: 'Error : Search box in Czech is not focused in due time.'
+    });
+    console.log("Info: Search box in Czech is visible and focused, the test continues...");
+
+    // Setting text "Packeta Group" into the search box and pressing Enter
+    await searchCz.addValue('Packeta Group');
+    await driver.pressKeyCode(66); 
+
 
     // Waiting for loading and verification of company name
     const resultTitle = await driver.$('//*contains(@text, "Packeta")]');
