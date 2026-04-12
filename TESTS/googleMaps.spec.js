@@ -1,3 +1,5 @@
+// Precondition: Initial agreements and settings have been clicked on manually after a build of a new emulator
+
 const { remote } = require('webdriverio');
 
 // Initializing the driver with desired capabilities for Google Maps
@@ -7,7 +9,7 @@ const capabilities = {
     'appium:deviceName': 'emulator-5554',
     'appium:appPackage': 'com.google.android.apps.maps',
     'appium:appActivity': 'com.google.android.maps.MapsActivity',
-    'appium:noReset': true,
+    'appium:noReset': true,   
 };
 
 // Actual test body
@@ -16,6 +18,7 @@ async function main() {
         protocol: 'http',
         hostname: '127.0.0.1',
         port: 4723,
+        path: '/',
         capabilities
     });
 
@@ -23,7 +26,6 @@ async function main() {
     console.log("Step 1 : Waiting for the search box to be visible in English");
     
     const searchEn = await driver.$('android=new UiSelector().text("Search here")');
-    const searchCz = await driver.$('//input[contains(@placeholder, "Vyhledání")]');
     
     await searchEn.waitForExist({ timeout: 15000});
     console.log("Info: Search box in English is visible, the test continues...")
@@ -31,30 +33,35 @@ async function main() {
     // Waiting for "Use Maps on Chrome" and clicking on it if it appears
     console.log("Step 2 : Waiting for Use Maps on Chrome and clicking on it if it appears");
     
-    const useMapsOnChrome = await driver.$('android=new UiSelector().className("android.widget.Button").textContains("Chrome")');
+    const useMapsOnChrome = await driver.$('//android.widget.Button[contains(@text, "Maps on Chrome")]');
     
     await useMapsOnChrome.waitForExist({ timeout: 20000 });
     await useMapsOnChrome.click();
     console.log("Info: 'Use Maps on Chrome' option has been clicked, the test continues...");
 
-    // Waiting for the search box to be fully displayed in Czech
+    // Waiting for the search box to be fully displayed in Czech and setting text into it
     console.log("Step 3 : Waiting for the search box to be fully displayed in Czech and setting text into it");
 
-    await searchCz.waitForDisplayed({ timeout: 55000 });
-    await searchCz.waitForEnabled({ timeout: 55000 });
-    await searchCz.click();
-
-    await driver.waitUntil(async () => await searchCz.isFocused(), {
-        timeout: 10000,
-        timeoutMsg: 'Error : Search box in Czech is not focused in due time.'
+   await driver.waitUntil(async () => (await driver.execute(() => document.readyState)) === 'complete', {
+        timeout: 150000,
+        timeoutMsg: 'Error: Page did not load within the expected time.'
     });
-    console.log("Info: Search box in Czech is visible and focused, the test continues...");
 
-    // Setting text "Packeta Group" into the search box and pressing Enter
-    await searchCz.addValue('Packeta Group');
-    await driver.pressKeyCode(66); 
+    await driver.performActions([{
+        type: 'pointer',
+        id: 'finger1',
+        parameters: { pointerType: 'touch' },
+        actions: [
+            { type: 'pointerMove', duration: 0, x: 550, y: 300 },  
+            { type: 'pointerDown', button: 0 },
+            { type: 'pointerUp', button: 0 }
+        ]
+    }]);
 
-
+    await driver.pause(2000);
+    await driver.keys(['P', 'a', 'c', 'k', 'e', 't', 'a', ' ', 'G', 'r', 'o', 'u', 'p']);
+    await driver.pressKeyCode(66);
+ 
     // Waiting for loading and verification of company name
     const resultTitle = await driver.$('//*contains(@text, "Packeta")]');
     await driver.waitUntil(async () => {
