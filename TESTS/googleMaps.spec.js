@@ -1,5 +1,6 @@
 const { remote } = require('webdriverio');
 
+// Initializing the driver with desired capabilities for Google Maps
 const capabilities = {
     platformName: 'Android',
     'appium:automationName': 'UiAutomator2',
@@ -9,6 +10,7 @@ const capabilities = {
     'appium:noReset': true,
 };
 
+// Actual test body
 async function main() {
     const driver = await remote({
         protocol: 'http',
@@ -17,23 +19,36 @@ async function main() {
         capabilities
     });
 
-    const chromeOption = await driver.$('/*[contains(@text, "Use Maps on Chrome")]');
-    await driver.waitUntil(async () => await chromeOption.isExisting(), {
-        timeout: 10000,
-        timeoutMsg: "Error: 'Use Maps on Chrome' option did not appear within the expected time.",
-        interval: 500
-    }).then(async () => {
-        await chromeOption.click();
-        console.log("Info: 'Use Maps on Chrome' option was displayed and clicked.");
-    }).catch(() => {
-        console.log("Info: 'Use Maps on Chrome' option was not displayed, proceeding with the test.");
-    });
+    // Waiting for the search box to be visible in English
+    console.log("Step 1 : Waiting for the search box to be visible in English");
+    
+    const searchEn = await driver.$('android=new UiSelector().text("Search here")');
+    const searchCz = await driver.$('android=new UiSelector().text("Vyhledání místa")');
+    
+    await searchEn.waitForExist({ timeout: 15000});
+    console.log("Info: Search box in English is visible, the test continues...");
 
-    // Setting the text into the search box
-    const searchBox = await driver.$('android=new UiSelector().text("Vyhledání místa")');
-    await searchBox.click();
-    await searchBox.setValue('Packeta Group');
-    await driver.pressKeyCode(66) // presses Enter key
+    // Waiting for "Use Maps on Chrome" and clicking on it if it appears
+    console.log("Step 2 : Waiting for Use Maps on Chrome and clicking on it if it appears");
+    
+    const useMapsOnChrome = await driver.$('android=new UiSelector().className("android.widget.Button").textContains("Chrome")');
+    
+    await useMapsOnChrome.waitForExist({ timeout: 20000 });
+    await useMapsOnChrome.click();
+    console.log("Info: 'Use Maps on Chrome' option has been clicked, the test continues...");
+
+    // Waiting for the search box loading in Czech
+    console.log("Step 3 : Waiting for the search box loading in Czech");
+    
+    await searchCz.waitForExist({ timeout: 55000 });
+    console.log("Info: Search box in Czech is visible, the test continues...");
+
+    // Setting text "Packeta Group" into the field and pressing Enter key
+    console.log("Step 4 : Setting text 'Packeta Group' into the field and pressing Enter key");
+    
+    await searchCz.click();
+    await searchCz.setValue('Packeta Group');
+    await driver.pressKeyCode(66);
 
     // Waiting for loading and verification of company name
     const resultTitle = await driver.$('//*contains(@text, "Packeta")]');
