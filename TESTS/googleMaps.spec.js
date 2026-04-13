@@ -1,4 +1,5 @@
 const GoogleMapsPageClass = require('../test/pageobjects/googleMaps.page.js');
+const SearchOnChromePageClass = require('../test/pageobjects/searchOnChrome.page.js');
 
 // Precondition: Initial agreements and settings have been clicked on manually after a build of a new emulator
 
@@ -30,7 +31,7 @@ async function main() {
     });
 
     const GoogleMapsPage = new GoogleMapsPageClass(driver);
-   
+    
     console.log("Step 1 : Waiting for the search box to be visible in English");
     
     await GoogleMapsPage.searchEn.waitForExist({ timeout: 15000});
@@ -40,8 +41,6 @@ async function main() {
     await GoogleMapsPage.useMapsOnChrome.waitForExist({ timeout: 20000 });
     await GoogleMapsPage.useMapsOnChrome.click();
     
-    console.log("Info: 'Use Maps on Chrome' option has been clicked, the test continues...");
-
     console.log("Step 3 : Waiting for the search box to be fully displayed in Czech and setting text into it");
 
     // Hardcore pause to allow the browser to load
@@ -90,39 +89,27 @@ async function main() {
     await driver.keys(['P', 'a', 'c', 'k', 'e', 't', 'a', ' ', 'G', 'r', 'o', 'u', 'p']);
     await driver.pressKeyCode(66);
  
-    // Waiting for loading and verification of company name
-    const resultTitle = await driver.$('//*contains(@text, "Packeta")]');
+    console.log("Step 4 : Verification of company name");
+    
+    const SearchOnChromePage = new SearchOnChromePageClass(driver);
+    
     await driver.waitUntil(async () => {
-        return await resultTitle.isDisplayed();
+        return await SearchOnChromePage.resultTitle.isDisplayed();
     }, {
         timeoutMsg :'Error : Search result Packeta has not been displayed in due time.'
     });
 
-    const actualName = await resultTitle.getText();
+    const actualName = await SearchOnChromePage.resultTitle.getText();
     const isCorrectName = actualName.includes('Packeta Group') || actualName.includes('Packeta s.r.o');
     
     if (!isCorrectName) {
         throw new Error(`Error : Search result has incorrect name. Expected: "Packeta Group" or "Packeta s.r.o", Actual: "${actualName}"`);
     }
-    console.log(`Test passed: Search result has correct name: ${actualName}`);
 
-    // Scrolling to the address
-    const addressSnippet = "Českomoravská 2408";
-    const scrollSelector = `new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().textContains("${addressSnippet}"))`;
-    
-    await $(`android=${scrollSelector}`);
+    console.log("Step 5 : Scrolling to the address.");
 
-    const addressElement = await $('//android.widget.TextView[contains(@text, "Českomoravská")]');
-    const actualAddress = await addressElement.getText();
-    const expectedAddress = "Českomoravská 2408, 190 00 Praha 9-Libeň";
-
-    console.log(`Actual address is : ${actualAddress}`);
-
-    if (actualAddress.includes(expectedAddress)) {
-        console.log("Test passed: Address is correct.");
-    } else {
-        throw new Error(`Error: Address is incorrect. Expected: "${expectedAddress}", Actual: "${actualAddress}"`);
-    }
+    SearchOnChromePage.companyAddress.scrollIntoView();
+    SearchOnChromePage.companyAddress.isDisplayed();
 }
 
 main();

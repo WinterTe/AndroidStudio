@@ -4,7 +4,7 @@ class GoogleMapsPage {
     }
 
     get searchEn() {
-        return this.driver.$(`android=new UiSelector().text("Search here")`);
+        return this.driver.$('android=new UiSelector().text("Search here")');
     }
 
     get useMapsOnChrome() {
