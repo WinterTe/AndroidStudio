@@ -44,36 +44,8 @@ async function main() {
     console.log("Step 3 : Waiting for the search box to be fully displayed in Czech and setting text into it");
 
     // Hardcore pause to allow the browser to load
-    await driver.pause(150000); 
+    await driver.pause(70000); 
 
-    /*
-    const contexts = await driver.getContexts();
-    console.log("Available contexts: ", contexts);
-    await driver.switchContext('WEBVIEW_com.google.android.apps.maps');
-
-    const routeElement = await $('android=new UiSelector().textContains("Trasa")');
-    await routeElement.waitForExist({ timeout: 150000 });
-    console.log("Info: Search box in Czech is visible, the test continues...")
-    try {
-        await routeElement.waitForExist({ 
-            timeout: 150000,
-            reverse: false,
-            timeoutMsg: 'Error: The page has not loaded.'
-        });
-        
-        console.log("Error: The page has not loaded.");
-        
-        await driver.pause(2000);
-
-    } catch (error) {
-        console.log("Info: The test has failed:" + error.message);
-    }
-    /*
-   await driver.waitUntil(async () => (await driver.execute(() => document.readyState)) === 'complete', {
-        timeout: 150000,
-        timeoutMsg: 'Error: Page did not load within the expected time.'
-    });
-*/
     await driver.performActions([{
         type: 'pointer',
         id: 'finger1',
@@ -90,7 +62,7 @@ async function main() {
     await driver.pressKeyCode(66);
  
     console.log("Step 4 : Verification of company name");
-    
+
     const SearchOnChromePage = new SearchOnChromePageClass(driver);
     
     await driver.waitUntil(async () => {
