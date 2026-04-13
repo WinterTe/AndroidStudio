@@ -1,3 +1,5 @@
+const GoogleMapsPageClass = require('../test/pageobjects/googleMaps.page.js');
+
 // Precondition: Initial agreements and settings have been clicked on manually after a build of a new emulator
 
 const { remote } = require('webdriverio');
@@ -17,9 +19,8 @@ const capabilities = {
 };
 
 // Actual test body
-import GoogleMapsPage from '../test/pageobjects/googleMaps.page.js';
-
 async function main() {
+  
     const driver = await remote({
         protocol: 'http',
         hostname: '127.0.0.1',
@@ -27,6 +28,8 @@ async function main() {
         path: '/',
         capabilities
     });
+
+    const GoogleMapsPage = new GoogleMapsPageClass(driver);
    
     console.log("Step 1 : Waiting for the search box to be visible in English");
     
@@ -42,7 +45,7 @@ async function main() {
     console.log("Step 3 : Waiting for the search box to be fully displayed in Czech and setting text into it");
 
     // Hardcore pause to allow the browser to load
-    await driver.pause(15000); 
+    await driver.pause(150000); 
 
     /*
     const contexts = await driver.getContexts();
