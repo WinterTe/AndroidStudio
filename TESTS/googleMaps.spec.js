@@ -27,29 +27,24 @@ async function main() {
         path: '/',
         capabilities
     });
-
-    const googleMapsPage = new GoogleMapsPage();
-    // Waiting for the search box to be visible in English
+   
     console.log("Step 1 : Waiting for the search box to be visible in English");
     
     await GoogleMapsPage.searchEn.waitForExist({ timeout: 15000});
-    console.log("Info: Search box in English is visible, the test continues...")
 
-    // Waiting for "Use Maps on Chrome" and clicking on it if it appears
     console.log("Step 2 : Waiting for Use Maps on Chrome and clicking on it if it appears");
     
-    const useMapsOnChrome = await driver.$('//android.widget.Button[contains(@text, "Maps on Chrome")]');
+    await GoogleMapsPage.useMapsOnChrome.waitForExist({ timeout: 20000 });
+    await GoogleMapsPage.useMapsOnChrome.click();
     
-    await useMapsOnChrome.waitForExist({ timeout: 20000 });
-    await useMapsOnChrome.click();
     console.log("Info: 'Use Maps on Chrome' option has been clicked, the test continues...");
 
-    // Waiting for the search box to be fully displayed in Czech and setting text into it
     console.log("Step 3 : Waiting for the search box to be fully displayed in Czech and setting text into it");
 
     // Hardcore pause to allow the browser to load
-    await driver.pause(10000); 
+    await driver.pause(15000); 
 
+    /*
     const contexts = await driver.getContexts();
     console.log("Available contexts: ", contexts);
     await driver.switchContext('WEBVIEW_com.google.android.apps.maps');
