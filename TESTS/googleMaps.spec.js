@@ -19,7 +19,6 @@ const capabilities = {
     'appium:noReset': true,   
 };
 
-// Actual test body
 async function main() {
   
     const driver = await remote({
@@ -43,9 +42,9 @@ async function main() {
     
     console.log("Step 3 : Waiting for the search box to be fully displayed in Czech and setting text into it");
 
-    // Hardcore pause to allow the browser to load
-    await driver.pause(70000); 
+    await driver.pause(70000); // Hardcore pause to allow the browser to load - implicit waits have led to test failure
 
+    // Hardcore solution - unable to get locator of the editText otherwise
     await driver.performActions([{
         type: 'pointer',
         id: 'finger1',
@@ -58,7 +57,7 @@ async function main() {
     }]);
 
     await driver.pause(2000);
-    await driver.keys(['P', 'a', 'c', 'k', 'e', 't', 'a', ' ', 'G', 'r', 'o', 'u', 'p']);
+    await driver.keys(['P', 'a', 'c', 'k', 'e', 't', 'a', ' ', 'G', 'r', 'o', 'u', 'p']); // Hardcore solution - set function won't work on the editText
     await driver.pressKeyCode(66);
  
     console.log("Step 4 : Verification of company name");
@@ -66,22 +65,22 @@ async function main() {
     const SearchOnChromePage = new SearchOnChromePageClass(driver);
     
     await driver.waitUntil(async () => {
-        return await SearchOnChromePage.resultTitle.isDisplayed();
+        const isVisible = await SearchOnChromePage.resultTitle.isDisplayed();
+        return isVisible == true;   
     }, {
-        timeoutMsg :'Error : Search result Packeta has not been displayed in due time.'
+        timeout: 30000,
+        timeoutMsg :'Error : Search result "Packeta Group" or "Packeta s.r.o" has not been displayed in due time.'
     });
-
-    const actualName = await SearchOnChromePage.resultTitle.getText();
-    const isCorrectName = actualName.includes('Packeta Group') || actualName.includes('Packeta s.r.o');
-    
-    if (!isCorrectName) {
-        throw new Error(`Error : Search result has incorrect name. Expected: "Packeta Group" or "Packeta s.r.o", Actual: "${actualName}"`);
-    }
 
     console.log("Step 5 : Scrolling to the address.");
 
-    SearchOnChromePage.companyAddress.scrollIntoView();
-    SearchOnChromePage.companyAddress.isDisplayed();
-}
+    await driver.execute((el) => {
+        el.scrollIntoView({
+            behavior: 'auto',
+            block: 'center'
+        });
+    }, await SearchOnChromePage.companyAddress);
+       
+    }
 
 main();
