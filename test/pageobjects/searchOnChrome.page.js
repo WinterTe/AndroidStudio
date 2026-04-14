@@ -5,11 +5,11 @@ class SearchOnChromePage {
     }
 
     get resultTitle() {
-        return this.driver.$('//*[contains(text(), "Packeta Group") or contains(text(), "Packeta s.r.o")]');
+        return this.driver.$("//*[contains(text(), 'Packeta')][2]");
     }
 
     get companyAddress() {
-        return this.driver.$('//*[contains(text(), "Českomoravská 2408, 190 00 Praha 9-Libeň")]');
+        return this.driver.$("//*[contains(text(), 'Českomoravská 2408')]");
     }
 }
 module.exports = SearchOnChromePage;

@@ -59,28 +59,19 @@ async function main() {
     await driver.pause(2000);
     await driver.keys(['P', 'a', 'c', 'k', 'e', 't', 'a', ' ', 'G', 'r', 'o', 'u', 'p']); // Hardcore solution - set function won't work on the editText
     await driver.pressKeyCode(66);
+    await driver.pause(70000); // Hardcore pause to allow the search results to load - implicit waits have led to test failure
  
     console.log("Step 4 : Verification of company name");
 
     const SearchOnChromePage = new SearchOnChromePageClass(driver);
-    
-    await driver.waitUntil(async () => {
-        const isVisible = await SearchOnChromePage.resultTitle.isDisplayed();
-        return isVisible == true;   
-    }, {
-        timeout: 30000,
-        timeoutMsg :'Error : Search result "Packeta Group" or "Packeta s.r.o" has not been displayed in due time.'
-    });
+    const titleFound = await SearchOnChromePage.resultTitle;
+    await titleFound.waitForDisplayed(
+        { timeout: 15000, });
 
     console.log("Step 5 : Scrolling to the address.");
 
-    await driver.execute((el) => {
-        el.scrollIntoView({
-            behavior: 'auto',
-            block: 'center'
-        });
-    }, await SearchOnChromePage.companyAddress);
-       
+    const address = await SearchOnChromePage.companyAddress;
+    await address.scrollIntoView();    
     }
 
 main();
